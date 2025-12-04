@@ -1,11 +1,281 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import Header from '../components/react/Header';
+import Sidebar from '../components/react/Sidebar';
+import Accordion from '../components/react/Accordion';
+import { notes } from '../data/notes.js';
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="English Grammar Mastery - Complete Study Material">
+    <div id="react-root">
+        <Header />
+        
+        <div class="app-layout">
+            <Sidebar client:load isOpen={false} onToggle={() => {}} />
+            
+            <main class="main-content">
+                <div class="container">
+                    <div class="content-area">
+                        <div class="welcome-section">
+                            <div class="welcome-content">
+                                <h1>My Grammar Struggle Notes</h1>
+                                <p class="subtitle">Personal study material for Sentence Types & Conjunctions</p>
+                                <div class="stats">
+                                    <div class="stat">
+                                        <i class="fas fa-sentence"></i>
+                                        <span>{notes.length} Core Topics</span>
+                                    </div>
+                                    <div class="stat">
+                                        <i class="fas fa-lightbulb"></i>
+                                        <span>Visual Learning</span>
+                                    </div>
+                                    <div class="stat">
+                                        <i class="fas fa-graduation-cap"></i>
+                                        <span>Personal Focus</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="topics-section">
+                            <h2 class="section-heading">My Grammar Notes</h2>
+                            <div class="accordions-container">
+                                {notes.map(note => (
+                                    <Accordion 
+                                        client:load
+                                        id={note.id}
+                                        title={note.title}
+                                        content={note.content}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+        
+        <!-- Floating accordion controls -->
+        <div class="accordion-controls">
+            <button id="expand-all-fixed" class="control-btn" data-tooltip="Expand All Sections">
+                <i class="fas fa-expand-alt"></i>
+            </button>
+            <button id="collapse-all-fixed" class="control-btn" data-tooltip="Collapse All Sections">
+                <i class="fas fa-compress-alt"></i>
+            </button>
+        </div>
+
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <p>&copy; 2025 My Grammar Notes. Personal study material for competitive exams.</p>
+                    <div class="footer-links">
+                        <a href="#" class="footer-link">Study Tips</a>
+                        <a href="#" class="footer-link">Practice</a>
+                        <a href="#" class="footer-link">Contact</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // @ts-nocheck
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('My Grammar Notes loaded');
+            
+            // Sidebar functionality
+            const sidebarToggle = document.querySelector('.sidebar-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const sidebarOverlay = document.querySelector('.sidebar-overlay');
+            
+            if (sidebarToggle && sidebar) {
+                sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+            }
+            
+            if (sidebarOverlay && sidebar) {
+                sidebarOverlay.addEventListener('click', () => sidebar.classList.remove('open'));
+            }
+            
+            // Close sidebar on mobile when clicking nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    if (window.innerWidth <= 1024 && sidebar) {
+                        sidebar.classList.remove('open');
+                    }
+                });
+            });
+            
+            // Expand/Collapse All functionality
+            function expandAllSections() {
+                document.querySelectorAll('.section-title').forEach(title => {
+                    const section = title.closest('.section');
+                    if (section && !section.classList.contains('active')) {
+                        title.click();
+                    }
+                });
+            }
+            
+            function collapseAllSections() {
+                document.querySelectorAll('.section-title').forEach(title => {
+                    const section = title.closest('.section');
+                    if (section && section.classList.contains('active')) {
+                        title.click();
+                    }
+                });
+            }
+            
+            // Floating buttons
+            document.getElementById('expand-all-fixed')?.addEventListener('click', expandAllSections);
+            document.getElementById('collapse-all-fixed')?.addEventListener('click', collapseAllSections);
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.altKey && e.key === 'e') {
+                    e.preventDefault();
+                    expandAllSections();
+                }
+                if (e.altKey && e.key === 'c') {
+                    e.preventDefault();
+                    collapseAllSections();
+                }
+                // Grammar shortcuts
+                if (e.altKey && e.key === 'f') {
+                    e.preventDefault();
+                    alert('FANBOYS = For, And, Nor, But, Or, Yet, So');
+                }
+                if (e.altKey && e.key === 'a') {
+                    e.preventDefault();
+                    alert('AAAWWUBBIS = After, Although, As, When, While, Until, Because, Before, If, Since');
+                }
+            });
+            
+            // Content protection
+            const copyrightNotice = document.createElement('div');
+            copyrightNotice.className = 'copyright-notice';
+            copyrightNotice.textContent = '© My Grammar Notes - Personal Study';
+            document.body.appendChild(copyrightNotice);
+            
+            // Prevent right-click
+            document.addEventListener('contextmenu', e => {
+                e.preventDefault();
+                alert('Content protected. Personal study material only.');
+            });
+            
+            // Prevent copy/paste shortcuts
+            document.addEventListener('keydown', function(e) {
+                const keysToBlock = ['c', 'x', 'a', 'C', 'X', 'A'];
+                if ((e.ctrlKey || e.metaKey) && keysToBlock.includes(e.key)) {
+                    e.preventDefault();
+                    alert('This action is disabled. Personal study material.');
+                }
+                if (e.key === 'PrintScreen') {
+                    alert('Screenshots are not permitted.');
+                }
+            });
+            
+            // Prevent text selection, copy, cut, drag
+            ['selectstart', 'copy', 'cut', 'dragstart'].forEach(event => {
+                document.addEventListener(event, e => e.preventDefault());
+            });
+        });
+    </script>
+<script>
+    (function() {
+        // Function to check if device is mobile
+        function isMobileDevice() {
+            return (
+                /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                (window.innerWidth <= 768)
+            );
+        }
+        
+        // Create and show banner
+        function showMobileBanner() {
+            // Check if alert was already shown in this session
+            // if (sessionStorage.getItem('mobileAlertShown') === 'true') {
+            //     return;
+            // }
+            
+            // Check if banner already exists
+            if (document.getElementById('mobile-alert-banner')) {
+                return;
+            }
+            
+            // Create banner element
+            const banner = document.createElement('div');
+            banner.id = 'mobile-alert-banner';
+            banner.className = 'mobile-alert-banner';
+            
+            // Banner content
+            banner.innerHTML = `
+                <div class="alert-content">
+                    <div class="alert-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.694-.833-2.464 0L4.33 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                        </svg>
+                    </div>
+                    <div class="alert-text">
+                        <h3>For Best Study Experience</h3>
+                        <p>This grammar study material is optimized for desktop viewing.</p>
+                    </div>
+                    <button class="alert-close" id="close-alert">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 6L6 18M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            
+            // Add banner to page
+            document.body.appendChild(banner);
+            
+            // Add overlay
+            const overlay = document.createElement('div');
+            overlay.id = 'mobile-alert-overlay';
+            overlay.className = 'mobile-alert-overlay';
+            document.body.appendChild(overlay);
+            
+            // Add event listener for close button with optional chaining
+            document.getElementById('close-alert')?.addEventListener('click', function() {
+                closeBanner();
+            });
+            
+            // Add event listener for overlay click
+            overlay.addEventListener('click', function() {
+                closeBanner();
+            });
+            
+            // Mark as shown
+            sessionStorage.setItem('mobileAlertShown', 'true');
+            
+            // Auto-close after 15 seconds
+            setTimeout(() => {
+                closeBanner();
+            }, 15000);
+        }
+        
+        function closeBanner() {
+            const banner = document.getElementById('mobile-alert-banner');
+            const overlay = document.getElementById('mobile-alert-overlay');
+            
+            banner?.classList.add('hiding');
+            overlay?.classList.add('hiding');
+            
+            setTimeout(() => {
+                banner?.parentNode?.removeChild(banner);
+                overlay?.parentNode?.removeChild(overlay);
+            }, 300);
+        }
+        
+        // Check if it's a mobile device
+        if (isMobileDevice()) {
+            // Wait for the ENTIRE page to load
+            window.addEventListener('load', function() {
+                // Add a small delay to ensure everything is fully rendered
+                setTimeout(showMobileBanner, 500);
+            });
+        }
+    })();
+</script>
 </Layout>
